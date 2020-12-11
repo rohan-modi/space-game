@@ -36,6 +36,7 @@ enemyY = []
 enemyXChange = []
 enemyYChange = []
 numberOfEnemies = 6
+enemySpeed = 3
 
 highscore = 0
 
@@ -65,6 +66,7 @@ textY = 10
 gameOverFont = pygame.font.Font('freesansbold.ttf', 35)
 highScoreFont = pygame.font.Font('freesansbold.ttf', 32)
 startGameFont = pygame.font.Font('freesansbold.ttf', 32)
+instructionsFont = pygame.font.Font('freesansbold.ttf', 32)
 
 
 # functions for stuff
@@ -89,11 +91,16 @@ def gameOverText():
 
 def highScoreText():
     highScoreText = highScoreFont.render("High score: " + str(highscore), True, (255, 255, 255))
-    screen.blit(highScoreText, (550, 10))
+    textWidth = highScoreText.get_width()
+    screen.blit(highScoreText, (780 - textWidth, 10))
 
 def startGameText():
     startGameText = startGameFont.render("Press s to start the game", True, (255, 255, 255))
     screen.blit(startGameText, (200, 250))
+
+def instructionsText():
+    instructionsText = instructionsFont.render("Use the arrow keys to move and shoot", True, (255, 255, 255))
+    screen.blit(instructionsText, (100, 220))
 
 def player(x, y):
     screen.blit(playerImage, (x, y))
@@ -121,6 +128,7 @@ def show_start_screen():
         screen.blit(background, (0, 0))
         highScoreText()
         startGameText()
+        instructionsText()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 start_screen = False
@@ -210,10 +218,10 @@ while game_running:
 
         enemyX[number] += enemyXChange[number]
         if enemyX[number] <= 0:
-            enemyXChange[number] = 3
+            enemyXChange[number] = enemySpeed
             enemyY[number] += enemyYChange[number]
         elif enemyX[number] >= 736:
-            enemyXChange[number] = -3
+            enemyXChange[number] = -enemySpeed
             enemyY[number] += enemyYChange[number]
         # collision
         collision = isCollision(enemyX[number], enemyY[number], bulletX, bulletY)
@@ -225,6 +233,7 @@ while game_running:
             scoreValue += 1
             enemyX[number] = random.randint(0, 700)
             enemyY[number] = random.randint(50, 150)
+            enemySpeed += 0.1
         
         enemy(enemyX[number], enemyY[number], number)
 
