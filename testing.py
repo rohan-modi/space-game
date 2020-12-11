@@ -130,9 +130,9 @@ def show_start_screen():
 
     return game_running
 
-highscoreUpdated = False
-running = True
-# update loop thing
+#===============================================================
+# Main Game Starts here
+#===============================================================
 
 highscoreUpdated = False
 game_running=True
@@ -143,82 +143,13 @@ while game_running:
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
     highScoreText()
-    if highscoreUpdated == False:
-        highScoreText()
-        highscoreUpdated = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
             game_running = False
+
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                if bulletState == "ready":
-                    # fire bullet
-                    bulletSound = mixer.Sound("goat scream short.wav")
-                    bulletSound.play()
-                    bulletX = playerX
-                    fireBullet(bulletX, bulletY)
-            if event.key == pygame.K_LEFT:
-                playerXChange =  -4
-            if event.key == pygame.K_RIGHT:
-                playerXChange = 4
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                playerXChange = 0
-    # player border security
-    playerX += playerXChange
-    if playerX <= 0:
-        playerX = 0
-    elif playerX >= 710:
-        playerX = 710
+            if event.key == pygame.K_x:
+                scoreValue += 10
 
-    # bullet border
-    if bulletY <= 0:
-        bulletY = 400
-        bulletState = "ready"
-
-    # move bullet
-    if bulletState == "fired":
-        fireBullet(bulletX, bulletY)
-        bulletY -= bulletYChange
-    
-    # enemy movement
-    for number in range(numberOfEnemies):
-    # Game over
-        if enemyY[number] > 365:
-            for num in range(numberOfEnemies):
-                enemyY[num] = 1000
-            if scoreRecorded == False:
-                scoreValue = str(scoreValue)
-                scoreValue = f"{scoreValue}\n"
-                f = open("scores.csv", "a")
-                f.write(scoreValue)
-                f.close()
-                scoreRecorded = True
-                scoreValue = int(scoreValue)
-            gameOverText()
-            break
-
-        enemyX[number] += enemyXChange[number]
-        if enemyX[number] <= 0:
-            enemyXChange[number] = 3
-            enemyY[number] += enemyYChange[number]
-        elif enemyX[number] >= 736:
-            enemyXChange[number] = -3
-            enemyY[number] += enemyYChange[number]
-        # collision
-        collision = isCollision(enemyX[number], enemyY[number], bulletX, bulletY)
-        if collision:
-            explosionSound = mixer.Sound("grenade.wav")
-            explosionSound.play()
-            bulletY = 400
-            bulletState = "ready"
-            scoreValue += 1
-            enemyX[number] = random.randint(0, 700)
-            enemyY[number] = random.randint(50, 150)
-        
-        enemy(enemyX[number], enemyY[number], number)
-
-    player(playerX, playerY)
     showScore(textX, textY)
     pygame.display.update()
