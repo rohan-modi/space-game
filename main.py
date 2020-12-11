@@ -63,8 +63,8 @@ textY = 10
 
 # game over text
 gameOverFont = pygame.font.Font('freesansbold.ttf', 35)
-
 highScoreFont = pygame.font.Font('freesansbold.ttf', 32)
+startGameFont = pygame.font.Font('freesansbold.ttf', 32)
 
 
 # functions for stuff
@@ -91,6 +91,10 @@ def highScoreText():
     highScoreText = highScoreFont.render("High score: " + str(highscore), True, (255, 255, 255))
     screen.blit(highScoreText, (550, 10))
 
+def startGameText():
+    startGameText = startGameFont.render("Press s to start the game", True, (255, 255, 255))
+    screen.blit(startGameText, (200, 250))
+
 def player(x, y):
     screen.blit(playerImage, (x, y))
 
@@ -116,6 +120,7 @@ def show_start_screen():
         screen.fill((0, 0, 0))
         screen.blit(background, (0, 0))
         highScoreText()
+        startGameText()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 start_screen = False
@@ -132,12 +137,16 @@ def show_start_screen():
 
 highscoreUpdated = False
 running = True
-# update loop thing
+
+#===============================================================
+# Main Game Starts here
+#===============================================================
 
 highscoreUpdated = False
 game_running=True
 
 game_running = show_start_screen()
+
 
 while game_running:
     screen.fill((0, 0, 0))
