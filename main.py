@@ -29,7 +29,7 @@ playerX = 370
 playerY = 440
 playerXChange = 0
 
-# enemy stuff
+# enemy stuff, enemy size 64 x 64
 enemyImage = []
 enemyX = []
 enemyY = []
@@ -48,10 +48,10 @@ for num in range (numberOfEnemies):
     enemyXChange.append(3)
     enemyYChange.append(40)
 
-# bullet stuff
+# bullet stuff, baguette size 11 x 45
 bulletImage = pygame.image.load('baguette.png')
 bulletX = 0
-bulletY = 440
+bulletY = 390
 bulletXChange = 0
 bulletYChange = 4
 bulletState = "ready"
@@ -111,11 +111,16 @@ def enemy(x, y, number):
 def fireBullet(x, y):
     global bulletState
     bulletState = "fired"
-    screen.blit(bulletImage, (x + 35, y - 40))
+    screen.blit(bulletImage, (x, y))
 
 def isCollision(enemyX, enemyY, bulletX, bulletY):
-    distance = ((enemyX - bulletX) ** 2 + (enemyY - bulletY) ** 2) ** 0.5
-    if distance < 40:
+    midEnemyX = enemyX + 32
+    midEnemyY = enemyY + 32
+    midBulletX = bulletX + 5.5
+    midBulletY = bulletY + 22.5
+    distanceX = abs(midEnemyX - midBulletX)
+    distanceY = abs(midEnemyY - midBulletY)
+    if distanceX < 37.5 and distanceY < 54.5:
         return True
     else:
         return False
@@ -173,7 +178,7 @@ while game_running:
                     # fire bullet
                     bulletSound = mixer.Sound("goat scream short.wav")
                     bulletSound.play()
-                    bulletX = playerX
+                    bulletX = playerX + 55
                     fireBullet(bulletX, bulletY)
             if event.key == pygame.K_LEFT:
                 playerXChange =  -4
@@ -191,7 +196,7 @@ while game_running:
 
     # bullet border
     if bulletY <= 0:
-        bulletY = 400
+        bulletY = 390
         bulletState = "ready"
 
     # move bullet
@@ -228,13 +233,12 @@ while game_running:
         if collision:
             explosionSound = mixer.Sound("grenade.wav")
             explosionSound.play()
-            bulletY = 400
+            bulletY = 390
             bulletState = "ready"
             scoreValue += 1
             enemyX[number] = random.randint(0, 700)
             enemyY[number] = random.randint(50, 150)
-            enemySpeed += 0.1
-        
+            enemySpeed += 0.1     
         enemy(enemyX[number], enemyY[number], number)
 
     player(playerX, playerY)
