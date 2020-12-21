@@ -48,6 +48,21 @@ for num in range (numberOfEnemies):
     enemyXChange.append(3)
     enemyYChange.append(40)
 
+# homework stuff
+homeworkImage = []
+homeworkX = []
+homeworkY = []
+homeworkYChange = []
+homeworkState = []
+
+# make homework
+for num in range (numberOfEnemies):
+    homeworkImage.append(pygame.image.load('homework.png'))
+    homeworkX.append(0)
+    homeworkY.append(enemyY[num] + 64)
+    homeworkYChange.append(2)
+    homeworkState.append("ready")
+
 # bullet stuff, baguette size 11 x 45
 bulletImage = pygame.image.load('baguette.png')
 bulletX = 0
@@ -113,6 +128,11 @@ def fireBullet(x, y):
     bulletState = "fired"
     screen.blit(bulletImage, (x, y))
 
+def dropHomework(x, y, number):
+    global homeworkState
+    homeworkState[number] = "dropped"
+    screen.blit(homeworkImage[number], (x, y))
+
 def isCollision(enemyX, enemyY, bulletX, bulletY):
     midEnemyX = enemyX + 32
     midEnemyY = enemyY + 32
@@ -124,6 +144,15 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
         return True
     else:
         return False
+
+def isKilled(playerX, playerY, homeworkX, homeworkY):
+    if homeworkY >= 440 and homeworkY <= 540:
+        midPlayerX = playerX + 50
+        midHomeworkX = homeworkX + 16
+        distanceX = abs(midPlayerX - midHomeworkX)
+        if distanceX <= 66:
+            game_running = False
+            return True
 
 def show_start_screen():
     start_screen = True
@@ -165,6 +194,8 @@ while game_running:
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
     highScoreText()
+    for number in range(numberOfEnemies):
+        enemy(enemyX[number], enemyY[number], number)
     if highscoreUpdated == False:
         highScoreText()
         highscoreUpdated = True
@@ -203,7 +234,19 @@ while game_running:
     if bulletState == "fired":
         fireBullet(bulletX, bulletY)
         bulletY -= bulletYChange
-    
+
+    # homework border
+    for number in range(numberOfEnemies):
+        if homeworkY[number] >= 768:
+            homeworkY[number] = enemyY[number] + 64
+            homeworkState[number] = "ready"
+
+    # homework movement
+    for number in range(numberOfEnemies):
+        if homeworkState[number] == "dropped":
+            dropHomework(homeworkX[number], homeworkY[number], number)
+            homeworkY[number] += homeworkYChange[number]
+
     # enemy movement
     for number in range(numberOfEnemies):
     # Game over
@@ -220,7 +263,22 @@ while game_running:
                 scoreValue = int(scoreValue)
             gameOverText()
             break
-
+    for number in range(numberOfEnemies):
+        if isKilled(playerX, playerY, homeworkX[number], homeworkY[number]):
+            for num in range(numberOfEnemies):
+                    enemyY[num] = 1000
+                    homeworkY[num] = 1000
+            if scoreRecorded == False:
+                scoreValue = str(scoreValue)
+                scoreValue = f"{scoreValue}\n"
+                f = open("scores.csv", "a")
+                f.write(scoreValue)
+                f.close()
+                scoreRecorded = True
+                scoreValue = int(scoreValue)
+            gameOverText()
+            break
+    for number in range(numberOfEnemies):
         enemyX[number] += enemyXChange[number]
         if enemyX[number] <= 0:
             enemyXChange[number] = enemySpeed
@@ -238,8 +296,14 @@ while game_running:
             scoreValue += 1
             enemyX[number] = random.randint(0, 700)
             enemyY[number] = random.randint(50, 150)
-            enemySpeed += 0.1     
-        enemy(enemyX[number], enemyY[number], number)
+            enemySpeed += 0.1
+            enemy(enemyX[number], enemyY[number], number)
+
+    for number in range(numberOfEnemies):
+        if homeworkState[number] == "ready":
+            # drop homework
+            homeworkX[number] = enemyX[number] + 32
+            dropHomework(homeworkX[number], homeworkY[number], number)
 
     player(playerX, playerY)
     showScore(textX, textY)
