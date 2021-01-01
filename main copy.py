@@ -10,6 +10,18 @@ pygame.font.init()
 screen = pygame.display.set_mode((800, 600))
 
 # functions for stuff
+def getHighScore(highscore):
+    with open('scores.csv', newline='') as scores:
+        allTheScores = csv.reader(scores, delimiter=' ', quotechar='|')
+        for row in allTheScores:
+            aScore = int(row[0])
+            if aScore > highscore:
+                highscore = aScore
+    return highscore
+
+def showScore(x, y):
+    score = font.render("Score: " + str(scoreValue), True, (255, 255, 255))
+    screen.blit(score, (x, y))
 
 def gameOverText():
     gameOverText = gameOverFont.render("YOU LOST, YOU MASSIVE DISAPPOINTMENT", True, (255, 255, 255))
@@ -18,6 +30,11 @@ def gameOverText():
 def restartText():
     restartText = restartFont.render("PRESS R TO PLAY AGAIN", True, (255, 255, 255))
     screen.blit(restartText, (200, 300))
+
+def highScoreText():
+    highScoreText = highScoreFont.render("High score: " + str(highscore), True, (255, 255, 255))
+    textWidth = highScoreText.get_width()
+    screen.blit(highScoreText, (780 - textWidth, 10))
 
 def startGameText():
     startGameText = startGameFont.render("Press s to start the game", True, (255, 255, 255))
@@ -92,7 +109,6 @@ def show_start_screen():
 playing = True
 while playing == True:
 
-
     scoreRecorded = False
     running = False
     dead = False
@@ -138,6 +154,23 @@ while playing == True:
             enemyYChange.append(40)
             enemySpeed.append(3)
 
+        def move(self, number):
+            global scoreRecorded
+            if enemyY[number] > 365:
+                dead = True
+                for num in range(numberOfEnemies):
+                    enemyY[num] = 1000
+                if scoreRecorded == False:
+                    scoreValue = str(scoreValue)
+                    scoreValue = f"{scoreValue}\n"
+                    f = open("scores.csv", "a")
+                    f.write(scoreValue)
+                    f.close()
+                    scoreRecorded = True
+                    scoreValue = int(scoreValue)
+                gameOverText()
+                restartText()
+
     # make enemies
     for number in range (numberOfEnemies):
         enemy()
@@ -171,40 +204,16 @@ while playing == True:
     textX = 10
     textY = 10
 
-    def recordScore():
-        global scoreValue
-        scoreValue = str(scoreValue)
-        scoreValue = f"{scoreValue}\n"
-        f = open("scores.csv", "a")
-        f.write(scoreValue)
-        f.close()
-        scoreRecorded = True
-        scoreValue = int(scoreValue)
-
-    def getHighScore(highscore):
-        with open('scores.csv', newline='') as scores:
-            allTheScores = csv.reader(scores, delimiter=' ', quotechar='|')
-            for row in allTheScores:
-                aScore = int(row[0])
-                if aScore > highscore:
-                    highscore = aScore
-        return highscore
-
-    def showScore(x, y):
-        score = font.render("Score: " + str(scoreValue), True, (255, 255, 255))
-        screen.blit(score, (x, y))
-
-    def highScoreText():
-        highScoreText = highScoreFont.render("High score: " + str(highscore), True, (255, 255, 255))
-        textWidth = highScoreText.get_width()
-        screen.blit(highScoreText, (780 - textWidth, 10))
-
     # game over text
     gameOverFont = pygame.font.Font('freesansbold.ttf', 35)
     highScoreFont = pygame.font.Font('freesansbold.ttf', 32)
     startGameFont = pygame.font.Font('freesansbold.ttf', 32)
     instructionsFont = pygame.font.Font('freesansbold.ttf', 32)
     restartFont = pygame.font.Font('freesansbold.ttf', 35)
+
+
+
+
 
     highscore = getHighScore(highscore)
     highscoreUpdated = False
@@ -285,15 +294,10 @@ while playing == True:
 
         # enemy movement
         for number in range(numberOfEnemies):
-        # Game over
-            if enemyY[number] > 365:
-                dead = True
-                for num in range(numberOfEnemies):
-                    enemyY[num] = 1000
-                if scoreRecorded == False:
-                    recordScore()
-                gameOverText()
-                restartText()
+            school = enemy()
+            school.move(number)
+            # Game over
+            if dead:
                 break
         for number in range(numberOfEnemies):
             if isKilled(playerX, playerY, homeworkX[number], homeworkY[number]):
