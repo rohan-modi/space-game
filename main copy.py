@@ -55,11 +55,6 @@ def fireBullet(x, y):
     bulletState = "fired"
     screen.blit(bulletImage, (x, y))
 
-def dropHomework(x, y, number):
-    global homeworkState
-    homeworkState[number] = "dropped"
-    screen.blit(homeworkImage[number], (x, y))
-
 def isCollision(enemyX, enemyY, bulletX, bulletY):
     midEnemyX = enemyX + 32
     midEnemyY = enemyY + 32
@@ -92,7 +87,6 @@ def show_start_screen():
         instructionsText()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                print("found it first")
                 start_screen = False
                 game_running = False
                 global playing
@@ -140,10 +134,15 @@ while playing == True:
     numberOfEnemies = 5
     enemySpeed = []
 
+    # score
+    scoreValue = 0
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    textX = 10
+    textY = 10
     highscore = 0
 
     # Classes for stuff hopefully
-    class enemy():
+    class enemy(): 
         def __init__(self):
             enemyImage.append(pygame.image.load('school.png'))
             thisEnemyX = random.randint(0, 700)
@@ -156,6 +155,7 @@ while playing == True:
 
         def move(self, number):
             global scoreRecorded
+            global scoreValue
             if enemyY[number] > 365:
                 dead = True
                 for num in range(numberOfEnemies):
@@ -171,24 +171,35 @@ while playing == True:
                 gameOverText()
                 restartText()
 
+    class homework():
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+            homeworkX.append(x)
+            homeworkY.append(y + 64)
+            homeworkYChange.append(2)
+            homeworkState.append("ready")
+
+        def move(self, number):
+            homeworkY[number] += homeworkYChange[number]
+            homeworkState[number] = "dropped"
+
     # make enemies
     for number in range (numberOfEnemies):
         enemy()
 
     # homework stuff
-    homeworkImage = []
+    homeworkImage = pygame.image.load('homework.png')
     homeworkX = []
     homeworkY = []
     homeworkYChange = []
     homeworkState = []
 
     # make homework
-    for num in range (numberOfEnemies):
-        homeworkImage.append(pygame.image.load('homework.png'))
-        homeworkX.append(0)
-        homeworkY.append(enemyY[num] + 64)
-        homeworkYChange.append(2)
-        homeworkState.append("ready")
+    for number in range (numberOfEnemies):
+        coordinateX = enemyX[number] + 32
+        coordinateY = enemyY[number]
+        homework(coordinateX, coordinateY)
 
     # bullet stuff, baguette size 11 x 45
     bulletImage = pygame.image.load('baguette.png')
@@ -198,22 +209,12 @@ while playing == True:
     bulletYChange = 4
     bulletState = "ready"
 
-    # score
-    scoreValue = 0
-    font = pygame.font.Font('freesansbold.ttf', 32)
-    textX = 10
-    textY = 10
-
     # game over text
     gameOverFont = pygame.font.Font('freesansbold.ttf', 35)
     highScoreFont = pygame.font.Font('freesansbold.ttf', 32)
     startGameFont = pygame.font.Font('freesansbold.ttf', 32)
     instructionsFont = pygame.font.Font('freesansbold.ttf', 32)
     restartFont = pygame.font.Font('freesansbold.ttf', 35)
-
-
-
-
 
     highscore = getHighScore(highscore)
     highscoreUpdated = False
@@ -240,7 +241,6 @@ while playing == True:
             highscoreUpdated = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                print("Found it")
                 running = False
                 game_running = False
                 playing = False
@@ -286,11 +286,20 @@ while playing == True:
                 homeworkY[number] = enemyY[number] + 64
                 homeworkState[number] = "ready"
 
+        for number in range(numberOfEnemies):
+            if homeworkState[number] == "ready":
+                # drop homework
+                homeworkX[number] = enemyX[number] + 32
+                homeworkY[number] = enemyY[number]
+                bomb = homework(homeworkX[number], homeworkY[number])
+                homeworkState[number] = "dropped"
+
         # homework movement
         for number in range(numberOfEnemies):
             if homeworkState[number] == "dropped":
-                dropHomework(homeworkX[number], homeworkY[number], number)
-                homeworkY[number] += homeworkYChange[number]
+                # move homework
+                bomb.move(number)
+                screen.blit(homeworkImage, (homeworkX[number], homeworkY[number]))
 
         # enemy movement
         for number in range(numberOfEnemies):
@@ -334,13 +343,7 @@ while playing == True:
                 scoreValue += 1
                 enemyX[number] = random.randint(0, 700)
                 enemyY[number] = random.randint(50, 150)
-                enemySpeed[number] += 0.1
-
-        for number in range(numberOfEnemies):
-            if homeworkState[number] == "ready":
-                # drop homework
-                homeworkX[number] = enemyX[number] + 32
-                dropHomework(homeworkX[number], homeworkY[number], number)
+                enemySpeed[number] += 0.5
 
         player(playerX, playerY)
         showScore(textX, textY)
