@@ -55,18 +55,6 @@ def fireBullet(x, y):
     bulletState = "fired"
     screen.blit(bulletImage, (x, y))
 
-def isCollision(enemyX, enemyY, bulletX, bulletY):
-    midEnemyX = enemyX + 32
-    midEnemyY = enemyY + 32
-    midBulletX = bulletX + 5.5
-    midBulletY = bulletY + 22.5
-    distanceX = abs(midEnemyX - midBulletX)
-    distanceY = abs(midEnemyY - midBulletY)
-    if distanceX < 37.5 and distanceY < 54.5 and bulletState == "fired":
-        return True
-    else:
-        return False
-
 def isKilled(playerX, playerY, homeworkX, homeworkY):
     if homeworkY >= 440 and homeworkY <= 540:
         midPlayerX = playerX + 50
@@ -107,6 +95,7 @@ while playing == True:
     running = False
     dead = False
     restart = False
+    bulletY = 390
 
     # background
     background = pygame.image.load('hell back.png')
@@ -141,7 +130,7 @@ while playing == True:
     textY = 10
     highscore = 0
 
-    # Classes for stuff hopefully
+    # Classes for stuff
     class enemy(): 
         def __init__(self):
             enemyImage.append(pygame.image.load('school.png'))
@@ -175,14 +164,48 @@ while playing == True:
         def __init__(self, x, y):
             self.x = x
             self.y = y
-            homeworkX.append(x)
-            homeworkY.append(y + 64)
+            homeworkX.append(self.x)
+            homeworkY.append(self.y)
             homeworkYChange.append(2)
             homeworkState.append("ready")
 
         def move(self, number):
             homeworkY[number] += homeworkYChange[number]
             homeworkState[number] = "dropped"
+            screen.blit(homeworkImage, (homeworkX[number], homeworkY[number]))
+
+    class bullet():
+        def __init__(self, playerX):
+            global bulletState
+            self.bulletX = playerX
+            bulletSound = mixer.Sound("goat scream short.wav")
+            bulletSound.play()
+            bulletX = playerX + 55
+            bulletState = "fired"
+        
+        def move(self):
+            global bulletY
+            global bulletState
+            global scoreValue
+            bulletY -= bulletYChange
+            screen.blit(bulletImage, (self.bulletX, bulletY))
+            for number in range (numberOfEnemies):
+                midEnemyX = enemyX[number] + 32
+                midEnemyY = enemyY[number] + 32
+                midBulletX = self.bulletX + 5.5
+                midBulletY = bulletY + 22.5
+                distanceX = abs(midEnemyX - midBulletX)
+                distanceY = abs(midEnemyY - midBulletY)
+                if distanceX < 37.5 and distanceY < 54.5 and bulletState == "fired":
+                    explosionSound = mixer.Sound("grenade.wav")
+                    explosionSound.play()
+                    bulletY = 390
+                    bulletState = "ready"
+                    scoreValue += 1
+                    enemyX[number] = random.randint(0, 700)
+                    enemyY[number] = random.randint(50, 150)
+                    enemySpeed[number] += 0.5
+            
 
     # make enemies
     for number in range (numberOfEnemies):
@@ -198,7 +221,7 @@ while playing == True:
     # make homework
     for number in range (numberOfEnemies):
         coordinateX = enemyX[number] + 32
-        coordinateY = enemyY[number]
+        coordinateY = enemyY[number] + 64
         homework(coordinateX, coordinateY)
 
     # bullet stuff, baguette size 11 x 45
@@ -206,7 +229,7 @@ while playing == True:
     bulletX = 0
     bulletY = 390
     bulletXChange = 0
-    bulletYChange = 4
+    bulletYChange = 5
     bulletState = "ready"
 
     # game over text
@@ -250,10 +273,7 @@ while playing == True:
                 if event.key == pygame.K_UP:
                     if bulletState == "ready":
                         # fire bullet
-                        bulletSound = mixer.Sound("goat scream short.wav")
-                        bulletSound.play()
-                        bulletX = playerX + 55
-                        fireBullet(bulletX, bulletY)
+                        baguette = bullet(playerX + 52)
                 if event.key == pygame.K_LEFT:
                     playerXChange =  -4
                 if event.key == pygame.K_RIGHT:
@@ -277,8 +297,7 @@ while playing == True:
 
         # move bullet
         if bulletState == "fired":
-            fireBullet(bulletX, bulletY)
-            bulletY -= bulletYChange
+            baguette.move()
 
         # homework border
         for number in range(numberOfEnemies):
@@ -290,7 +309,7 @@ while playing == True:
             if homeworkState[number] == "ready":
                 # drop homework
                 homeworkX[number] = enemyX[number] + 32
-                homeworkY[number] = enemyY[number]
+                homeworkY[number] = enemyY[number] + 64
                 bomb = homework(homeworkX[number], homeworkY[number])
                 homeworkState[number] = "dropped"
 
@@ -299,7 +318,6 @@ while playing == True:
             if homeworkState[number] == "dropped":
                 # move homework
                 bomb.move(number)
-                screen.blit(homeworkImage, (homeworkX[number], homeworkY[number]))
 
         # enemy movement
         for number in range(numberOfEnemies):
@@ -334,16 +352,6 @@ while playing == True:
                 enemyXChange[number] = -enemySpeed[number]
                 enemyY[number] += enemyYChange[number]
             # collision
-            collision = isCollision(enemyX[number], enemyY[number], bulletX, bulletY)
-            if collision:
-                explosionSound = mixer.Sound("grenade.wav")
-                explosionSound.play()
-                bulletY = 390
-                bulletState = "ready"
-                scoreValue += 1
-                enemyX[number] = random.randint(0, 700)
-                enemyY[number] = random.randint(50, 150)
-                enemySpeed[number] += 0.5
 
         player(playerX, playerY)
         showScore(textX, textY)
