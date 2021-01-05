@@ -4,9 +4,7 @@ import pygame
 from pygame import mixer
 
 import csv
-
-with open("scores.csv","a+") as f:
-    f.write("0\n")
+import os
 
 pygame.mixer.init()
 pygame.font.init()
@@ -130,12 +128,15 @@ class bullet():
 
 # functions for stuff
 def getHighScore(highscore):
-    with open('scores.csv', newline='') as scores:
-        allTheScores = csv.reader(scores, delimiter=' ', quotechar='|')
-        for row in allTheScores:
-            aScore = int(row[0])
-            if aScore > highscore:
-                highscore = aScore
+    if not os.path.isfile('scores.csv'):
+        with open("scores.csv","a+") as f:
+            f.write("0\n")
+    with open('scores.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            score = int(row[0])
+            if score > highscore:
+                highscore = score
     return highscore
 
 def showScore(x, y):
