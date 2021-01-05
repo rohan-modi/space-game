@@ -4,10 +4,128 @@ import pygame
 from pygame import mixer
 
 import csv
+notwith open("scores.csv","a+") as f:
+    f.write("0\n")
 
 pygame.mixer.init()
 pygame.font.init()
 screen = pygame.display.set_mode((800, 600))
+
+# background
+background = pygame.image.load('hell back.png')
+
+# background music
+mixer.music.load("think about this.wav")
+mixer.music.play(-1)
+
+# title and icon
+pygame.display.set_caption("Kewl game")
+icon = pygame.image.load('ufo logo.png')
+pygame.display.set_icon(icon)
+
+# player stuff
+playerImage = pygame.image.load('edgy kid.png')
+playerY = 440
+playerXChange = 0
+
+numberOfEnemies = 5
+
+# lonely images
+homeworkImage = pygame.image.load('homework.png')
+
+# fonts
+gameOverFont = pygame.font.Font('freesansbold.ttf', 35)
+highScoreFont = pygame.font.Font('freesansbold.ttf', 32)
+startGameFont = pygame.font.Font('freesansbold.ttf', 32)
+instructionsFont = pygame.font.Font('freesansbold.ttf', 32)
+restartFont = pygame.font.Font('freesansbold.ttf', 35)
+
+# score stuff
+font = pygame.font.Font('freesansbold.ttf', 32)
+textX = 10
+textY = 10
+highscore = 0
+
+# bullet stuff, baguette size 11 x 45
+bulletImage = pygame.image.load('baguette.png')
+bulletYChange = 5
+
+# classes for stuff
+class enemy(): 
+    def __init__(self):
+        enemyImage.append(pygame.image.load('school.png'))
+        thisEnemyX = random.randint(0, 700)
+        thisEnemyY = random.randint(50, 150)
+        enemyX.append(thisEnemyX)
+        enemyY.append(thisEnemyY)
+        enemyXChange.append(3)
+        enemyYChange.append(40)
+        enemySpeed.append(3)
+
+    def move(self, number):
+        global scoreRecorded
+        global scoreValue
+        if enemyY[number] > 365:
+            dead = True
+            for num in range(numberOfEnemies):
+                enemyY[num] = 1000
+            if scoreRecorded == False:
+                scoreValue = str(scoreValue)
+                scoreValue = f"{scoreValue}\n"
+                with open("scores.csv","a+") as f:
+                    f.write(scoreValue)
+                f = open("scores.csv", "a")
+                f.write(scoreValue)
+                scoreRecorded = True
+                scoreValue = int(scoreValue)
+            gameOverText()
+            restartText()
+
+class homework():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        homeworkX.append(self.x)
+        homeworkY.append(self.y)
+        homeworkYChange.append(2)
+        homeworkState.append("ready")
+
+    def move(self, number):
+        homeworkY[number] += homeworkYChange[number]
+        homeworkState[number] = "dropped"
+        screen.blit(homeworkImage, (homeworkX[number], homeworkY[number]))
+
+class bullet():
+    def __init__(self, playerX):
+        global bulletState
+        self.bulletX = playerX
+        bulletSound = mixer.Sound("goat scream short.wav")
+        bulletSound.play()
+        bulletX = playerX + 55
+        bulletState = "fired"
+    
+    def move(self):
+        global bulletY
+        global bulletState
+        global scoreValue
+        bulletY -= bulletYChange
+        screen.blit(bulletImage, (self.bulletX, bulletY))
+        for number in range (numberOfEnemies):
+            midEnemyX = enemyX[number] + 32
+            midEnemyY = enemyY[number] + 32
+            midBulletX = self.bulletX + 5.5
+            midBulletY = bulletY + 22.5
+            distanceX = abs(midEnemyX - midBulletX)
+            distanceY = abs(midEnemyY - midBulletY)
+            if distanceX < 37.5 and distanceY < 54.5 and bulletState == "fired":
+                explosionSound = mixer.Sound("grenade.wav")
+                explosionSound.play()
+                bulletY = 390
+                bulletState = "ready"
+                scoreValue += 1
+                enemyX[number] = random.randint(0, 700)
+                enemyY[number] = random.randint(50, 150)
+                enemySpeed[number] += 0.5
 
 # functions for stuff
 def getHighScore(highscore):
@@ -88,6 +206,7 @@ def show_start_screen():
 
     return game_running
 
+# Giant loop
 playing = True
 while playing == True:
 
@@ -96,23 +215,7 @@ while playing == True:
     dead = False
     restart = False
     bulletY = 390
-
-    # background
-    background = pygame.image.load('hell back.png')
-
-    # background music
-    mixer.music.load("think about this.wav")
-    mixer.music.play(-1)
-
-    # title and icon
-    pygame.display.set_caption("Kewl game")
-    icon = pygame.image.load('ufo logo.png')
-    pygame.display.set_icon(icon)
-
-    playerImage = pygame.image.load('edgy kid.png')
     playerX = 370
-    playerY = 440
-    playerXChange = 0
 
     # enemy stuff, enemy size 64 x 64
     enemyImage = []
@@ -120,99 +223,16 @@ while playing == True:
     enemyY = []
     enemyXChange = []
     enemyYChange = []
-    numberOfEnemies = 5
     enemySpeed = []
 
     # score
     scoreValue = 0
-    font = pygame.font.Font('freesansbold.ttf', 32)
-    textX = 10
-    textY = 10
-    highscore = 0
-
-    # Classes for stuff
-    class enemy(): 
-        def __init__(self):
-            enemyImage.append(pygame.image.load('school.png'))
-            thisEnemyX = random.randint(0, 700)
-            thisEnemyY = random.randint(50, 150)
-            enemyX.append(thisEnemyX)
-            enemyY.append(thisEnemyY)
-            enemyXChange.append(3)
-            enemyYChange.append(40)
-            enemySpeed.append(3)
-
-        def move(self, number):
-            global scoreRecorded
-            global scoreValue
-            if enemyY[number] > 365:
-                dead = True
-                for num in range(numberOfEnemies):
-                    enemyY[num] = 1000
-                if scoreRecorded == False:
-                    scoreValue = str(scoreValue)
-                    scoreValue = f"{scoreValue}\n"
-                    f = open("scores.csv", "a")
-                    f.write(scoreValue)
-                    f.close()
-                    scoreRecorded = True
-                    scoreValue = int(scoreValue)
-                gameOverText()
-                restartText()
-
-    class homework():
-        def __init__(self, x, y):
-            self.x = x
-            self.y = y
-            homeworkX.append(self.x)
-            homeworkY.append(self.y)
-            homeworkYChange.append(2)
-            homeworkState.append("ready")
-
-        def move(self, number):
-            homeworkY[number] += homeworkYChange[number]
-            homeworkState[number] = "dropped"
-            screen.blit(homeworkImage, (homeworkX[number], homeworkY[number]))
-
-    class bullet():
-        def __init__(self, playerX):
-            global bulletState
-            self.bulletX = playerX
-            bulletSound = mixer.Sound("goat scream short.wav")
-            bulletSound.play()
-            bulletX = playerX + 55
-            bulletState = "fired"
-        
-        def move(self):
-            global bulletY
-            global bulletState
-            global scoreValue
-            bulletY -= bulletYChange
-            screen.blit(bulletImage, (self.bulletX, bulletY))
-            for number in range (numberOfEnemies):
-                midEnemyX = enemyX[number] + 32
-                midEnemyY = enemyY[number] + 32
-                midBulletX = self.bulletX + 5.5
-                midBulletY = bulletY + 22.5
-                distanceX = abs(midEnemyX - midBulletX)
-                distanceY = abs(midEnemyY - midBulletY)
-                if distanceX < 37.5 and distanceY < 54.5 and bulletState == "fired":
-                    explosionSound = mixer.Sound("grenade.wav")
-                    explosionSound.play()
-                    bulletY = 390
-                    bulletState = "ready"
-                    scoreValue += 1
-                    enemyX[number] = random.randint(0, 700)
-                    enemyY[number] = random.randint(50, 150)
-                    enemySpeed[number] += 0.5
-            
 
     # make enemies
     for number in range (numberOfEnemies):
         enemy()
 
     # homework stuff
-    homeworkImage = pygame.image.load('homework.png')
     homeworkX = []
     homeworkY = []
     homeworkYChange = []
@@ -224,20 +244,10 @@ while playing == True:
         coordinateY = enemyY[number] + 64
         homework(coordinateX, coordinateY)
 
-    # bullet stuff, baguette size 11 x 45
-    bulletImage = pygame.image.load('baguette.png')
+    # bullet stuff
     bulletX = 0
     bulletY = 390
-    bulletXChange = 0
-    bulletYChange = 5
     bulletState = "ready"
-
-    # game over text
-    gameOverFont = pygame.font.Font('freesansbold.ttf', 35)
-    highScoreFont = pygame.font.Font('freesansbold.ttf', 32)
-    startGameFont = pygame.font.Font('freesansbold.ttf', 32)
-    instructionsFont = pygame.font.Font('freesansbold.ttf', 32)
-    restartFont = pygame.font.Font('freesansbold.ttf', 35)
 
     highscore = getHighScore(highscore)
     highscoreUpdated = False
