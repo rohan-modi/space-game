@@ -64,6 +64,7 @@ class enemy():
     def move(self, number):
         global scoreRecorded
         global scoreValue
+        global dead
         if enemyY[number] > 365:
             dead = True
             for num in range(numberOfEnemies):
@@ -86,7 +87,7 @@ class homework():
         self.y = y
         homeworkX.append(self.x)
         homeworkY.append(self.y)
-        homeworkYChange.append(2)
+        homeworkYChange.append(0)
         homeworkState.append("ready")
 
     def move(self, number):

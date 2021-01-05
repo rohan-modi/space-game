@@ -64,6 +64,7 @@ class enemy():
     def move(self, number):
         global scoreRecorded
         global scoreValue
+        global dead
         if enemyY[number] > 365:
             dead = True
             for num in range(numberOfEnemies):
@@ -181,7 +182,6 @@ def isKilled(playerX, playerY, homeworkX, homeworkY):
         midHomeworkX = homeworkX + 16
         distanceX = abs(midPlayerX - midHomeworkX)
         if distanceX <= 66:
-            game_running = False
             return True
 
 def show_start_screen():
